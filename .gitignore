@@ -1,6 +1,7 @@
 # 실행 산출물 — Airflow 가 계속 만들어 냅니다
 logs/
 output/
+config/
 __pycache__/
 *.pyc
 
