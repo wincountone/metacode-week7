@@ -1,0 +1,41 @@
+x-spark-common: &spark-common
+  image: apache/spark:3.5.3-python3
+  user: "root"
+  environment:
+    - TZ=Asia/Seoul
+  volumes:
+    - ./jobs:/opt/spark/work-dir/jobs
+    - ../data:/opt/spark/work-dir/data
+  networks:
+    - spark-network
+
+services:
+  spark-master:
+    <<: *spark-common
+    container_name: q4-spark-master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    environment:
+      - TZ=Asia/Seoul
+      - SPARK_MASTER_WEBUI_PORT=8080
+      - SPARK_LOCAL_IP=0.0.0.0
+    ports:
+      - "8090:8080" # Spark Master Web UI
+      - "7077:7077" # Spark Master Port
+
+  spark-worker-1:
+    <<: *spark-common
+    container_name: q4-spark-worker-1
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      - TZ=Asia/Seoul
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_WEBUI_PORT=8081
+      - SPARK_LOCAL_IP=0.0.0.0
+    ports:
+      - "8091:8081" # Spark Worker Web UI
+    depends_on:
+      - spark-master
+
+networks:
+  spark-network:
